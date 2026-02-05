@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Generator</title>
+    <link rel="stylesheet" href="/static/generator.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="back-link">← Dashboard</a>
+            <h1>🏠 Account Generator</h1>
+            <p class="subtitle">Generate accounts with Gmail dot variations</p>
+        </header>
+
+        <main>
+            <!-- Form Section -->
+            <form id="generatorForm" class="form-section">
+                <!-- Email Type Toggle -->
+                <div class="email-type-toggle">
+                    <label class="toggle-label">Email Type:</label>
+                    <div class="toggle-buttons">
+                        <button type="button" id="gmailType" class="toggle-btn active">Gmail</button>
+                        <button type="button" id="otherType" class="toggle-btn">Other Email</button>
+                    </div>
+                </div>
+
+                <!-- Line 1: Email, Password, Count -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="yourname@gmail.com">
+                        <span class="hint" id="emailHint">Enter Gmail without dots for maximum variations</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Account Password</label>
+                        <input type="password" id="password" name="password" placeholder="••••••••" required>
+                        <span class="hint">8+ chars, upper, lower, number</span>
+                    </div>
+
+                    <div class="form-group form-group-small">
+                        <label for="count">Accounts</label>
+                        <select id="count" name="count">
+                            <option value="1">1</option>
+                        </select>
+                        <span class="hint" id="countHint">Max: calculating...</span>
+                    </div>
+                </div>
+
+                <!-- Location Status -->
+                <div class="location-status" id="locationStatus">
+                    <span class="status-icon">📍</span>
+                    <span class="status-text" id="locationText">Checking locations...</span>
+                </div>
+
+                <!-- Line 2: Optional Apartment Info -->
+                <div class="form-row optional-section">
+                    <div class="section-header">
+                        <span class="optional-badge" id="locationBadge">Optional</span>
+                        <span>New Apartment Location</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="geolocation">Geolocation</label>
+                        <input type="text" id="geolocation" name="geolocation" placeholder="29.452137, -98.642559">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fullAddress">Full Address</label>
+                        <input type="text" id="fullAddress" name="fullAddress"
+                            placeholder="1234 Main St, City, TX 78XXX">
+                    </div>
+                </div>
+
+                <!-- Generate Button -->
+                <button type="submit" id="generateBtn" class="generate-btn">
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-text">Start Process</span>
+                </button>
+            </form>
+
+            <!-- Console Output Section -->
+            <div class="console-section">
+                <div class="console-header">
+                    <span class="console-title">📟 Console Output</span>
+                    <button type="button" id="clearConsole" class="clear-btn">Clear</button>
+                </div>
+                <div id="consoleOutput" class="console-output">
+                    <div class="console-line system">Ready. Enter your email and click Generate.</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-icon">⚠️</span>
+                <h2>Validation Error</h2>
+            </div>
+            <div class="modal-body">
+                <ul id="errorList"></ul>
+            </div>
+            <button type="button" class="modal-close" onclick="closeModal()">Got it</button>
+        </div>
+    </div>
+
+    <script src="/static/generator.js"></script>
+</body>
+
+</html>

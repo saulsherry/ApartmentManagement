@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Manager</title>
+    <link rel="stylesheet" href="/static/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🏠 Account Manager</h1>
+            <p class="subtitle">Account Management Dashboard</p>
+        </header>
+
+        <!-- URL Configuration Section -->
+        <section class="url-config-section" id="urlConfigSection">
+            <div class="config-card">
+                <div class="config-icon">🔗</div>
+                <div class="config-content">
+                    <h2>Configure Target Website</h2>
+                    <p>Enter the base URL for the website you want to manage</p>
+                    <div class="config-form">
+                        <input type="url" id="baseUrlInput"
+                            placeholder="Enter website URL (e.g., https://m.example.com)" required>
+                        <button id="saveUrlBtn" class="btn-primary">Save & Continue</button>
+                    </div>
+                    <div id="urlStatus" class="url-status"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard content (hidden until URL is configured) -->
+        <main class="dashboard-grid" id="dashboardMain" style="display: none;">
+            <!-- Account Generator Card -->
+            <a href="/generator" class="dashboard-card">
+                <div class="card-icon">🚀</div>
+                <div class="card-content">
+                    <h2>Account Generator</h2>
+                    <p>Generate new accounts with Gmail aliases</p>
+                </div>
+                <div class="card-arrow">→</div>
+            </a>
+
+            <!-- Update Payment Card -->
+            <a href="/payment" class="dashboard-card">
+                <div class="card-icon">💳</div>
+                <div class="card-content">
+                    <h2>Update Payment</h2>
+                    <p>Add credit card information to accounts</p>
+                </div>
+                <div class="card-arrow">→</div>
+            </a>
+
+            <!-- Update Credit Card -->
+            <a href="/credits" class="dashboard-card">
+                <div class="card-icon">💰</div>
+                <div class="card-content">
+                    <h2>Update Credit</h2>
+                    <p>Sync wallet credit balances for all accounts</p>
+                </div>
+                <div class="card-arrow">→</div>
+            </a>
+
+            <!-- Make Purchase Card  -->
+            <a href="/purchase" class="dashboard-card">
+                <div class="card-icon">🛒</div>
+                <div class="card-content">
+                    <h2>Make Purchase</h2>
+                    <p>Automate purchases from accounts</p>
+                </div>
+                <div class="card-arrow">→</div>
+            </a>
+        </main>
+
+        <!-- Quick Stats (hidden until URL is configured) -->
+        <section class="stats-section" id="statsSection" style="display: none;">
+            <h3>📊 Quick Stats</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value" id="totalAccounts">-</span>
+                    <span class="stat-label">Total Accounts</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="accountsWithPayment">-</span>
+                    <span class="stat-label">With Payment</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="accountsWithCredit">-</span>
+                    <span class="stat-label">With Credit</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Current URL display (shown when configured) -->
+        <section class="current-url-section" id="currentUrlSection" style="display: none;">
+            <div class="current-url-card">
+                <span class="url-label">Target:</span>
+                <span class="url-value" id="currentUrlDisplay"></span>
+                <button id="changeUrlBtn" class="btn-link">Change</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+
+        // Check for stored URL on load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkUrlConfig();
+        });
+
+        async function checkUrlConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/config`);
+                const config = await response.json();
+
+                if (config.base_url) {
+                    showDashboard(config.base_url);
+                } else {
+                    showUrlConfig();
+                }
+            } catch (error) {
+                console.error('Failed to fetch config:', error);
+                showUrlConfig();
+            }
+        }
+
+        function showUrlConfig() {
+            document.getElementById('urlConfigSection').style.display = 'block';
+            document.getElementById('dashboardMain').style.display = 'none';
+            document.getElementById('statsSection').style.display = 'none';
+            document.getElementById('currentUrlSection').style.display = 'none';
+        }
+
+        function showDashboard(baseUrl) {
+            document.getElementById('urlConfigSection').style.display = 'none';
+            document.getElementById('dashboardMain').style.display = 'grid';
+            document.getElementById('statsSection').style.display = 'block';
+            document.getElementById('currentUrlSection').style.display = 'block';
+            document.getElementById('currentUrlDisplay').textContent = baseUrl;
+
+            // Load stats
+            loadStats();
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+
+                document.getElementById('totalAccounts').textContent = data.length;
+
+                const withPayment = data.filter(row => row.card && row.card.trim() !== '').length;
+                document.getElementById('accountsWithPayment').textContent = withPayment;
+
+                const withCredit = data.filter(row => {
+                    const credit = parseFloat(row.remain_credit);
+                    return !isNaN(credit) && credit > 0;
+                }).length;
+                document.getElementById('accountsWithCredit').textContent = withCredit;
+            } catch (error) {
+                console.error('Failed to fetch stats:', error);
+            }
+        }
+
+        // Save URL button
+        document.getElementById('saveUrlBtn').addEventListener('click', async () => {
+            const urlInput = document.getElementById('baseUrlInput');
+            const statusDiv = document.getElementById('urlStatus');
+            const baseUrl = urlInput.value.trim();
+
+            if (!baseUrl) {
+                statusDiv.textContent = 'Please enter a URL';
+                statusDiv.className = 'url-status error';
+                return;
+            }
+
+            // Basic URL validation
+            try {
+                new URL(baseUrl);
+            } catch (e) {
+                statusDiv.textContent = 'Please enter a valid URL';
+                statusDiv.className = 'url-status error';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ base_url: baseUrl })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showDashboard(baseUrl);
+                } else {
+                    statusDiv.textContent = 'Failed to save URL';
+                    statusDiv.className = 'url-status error';
+                }
+            } catch (error) {
+                statusDiv.textContent = 'Error saving URL';
+                statusDiv.className = 'url-status error';
+            }
+        });
+
+        // Change URL button
+        document.getElementById('changeUrlBtn').addEventListener('click', () => {
+            showUrlConfig();
+        });
+    </script>
+</body>
+
+</html>

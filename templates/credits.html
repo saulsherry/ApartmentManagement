@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Credit - Account Manager</title>
+    <link rel="stylesheet" href="/static/credits.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <nav class="nav-bar">
+            <a href="/" class="nav-back">← Dashboard</a>
+            <span class="nav-title">💰 Update Credit</span>
+        </nav>
+
+        <!-- Main Content - Split View -->
+        <div class="split-view">
+            <!-- Left: Operations -->
+            <section class="operations-panel">
+                <!-- Status Info -->
+                <div class="status-card">
+                    <div class="status-row">
+                        <span class="status-label">Total Accounts:</span>
+                        <span class="status-value" id="totalAccounts">-</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">With Credits:</span>
+                        <span class="status-value" id="withCredits">-</span>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="action-area">
+                    <button id="updateAllBtn" class="primary-btn">
+                        <span class="btn-icon">🔄</span>
+                        <span class="btn-text">Update Credit for All Accounts</span>
+                    </button>
+                    <button id="stopBtn" class="danger-btn hidden">
+                        <span class="btn-icon">⏹️</span>
+                        <span class="btn-text">Stop</span>
+                    </button>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="progress-section hidden" id="progressSection">
+                    <div class="progress-header">
+                        <span class="progress-text" id="progressText">Processing...</span>
+                        <span class="progress-count" id="progressCount">0/0</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <p class="current-account" id="currentAccount">-</p>
+                </div>
+
+                <!-- Summary (shown after completion) -->
+                <div class="summary-section hidden" id="summarySection">
+                    <h4>📊 Update Summary</h4>
+                    <div class="summary-stats">
+                        <div class="summary-item">
+                            <span class="summary-value success" id="successCount">0</span>
+                            <span class="summary-label">Successful</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-value error" id="failCount">0</span>
+                            <span class="summary-label">Failed</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right: Console -->
+            <aside class="console-panel">
+                <div class="console-header">
+                    <span class="console-title">📟 Log</span>
+                    <button type="button" id="clearConsole" class="clear-btn">Clear</button>
+                </div>
+                <div id="consoleOutput" class="console-output">
+                    <div class="console-line system">Ready. Click "Update Credit for All Accounts" to begin.</div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Bottom: Data Table -->
+        <section class="data-panel">
+            <div class="data-header">
+                <h3>📊 Account Credits</h3>
+                <span class="refresh-indicator" id="refreshIndicator">Auto-refresh: ON</span>
+            </div>
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Full Name</th>
+                            <th>Card</th>
+                            <th>Remain Credit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="4" class="loading">Loading data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script src="/static/credits.js"></script>
+</body>
+
+</html>

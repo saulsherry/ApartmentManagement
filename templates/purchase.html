@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make Purchase - Account Manager</title>
+    <link rel="stylesheet" href="/static/purchase.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="back-link">← Dashboard</a>
+            <h1>🛒 Make Purchase</h1>
+            <p class="subtitle">Select accounts and purchase products</p>
+        </header>
+
+        <main>
+            <!-- Warning Notice -->
+            <div class="notice warning">
+                <span class="notice-icon">⚠️</span>
+                <span class="notice-text"><strong>Note:</strong> "Remain Balance" does not update automatically. Use the
+                    Credits page to refresh balances after purchases.</span>
+            </div>
+
+            <!-- Top Half: Account Selection & Merchandise -->
+            <div class="top-section">
+                <!-- Left: Account Selection -->
+                <div class="panel account-panel">
+                    <div class="panel-header">
+                        <h2>📋 Select Account</h2>
+                        <span class="badge" id="eligibleCount">0 eligible</span>
+                    </div>
+
+                    <div class="account-list" id="accountList">
+                        <div class="loading">Loading accounts...</div>
+                    </div>
+
+                    <div class="panel-actions">
+                        <button type="button" id="refreshAccounts" class="btn-secondary">
+                            🔄 Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Merchandise List -->
+                <div class="panel merchandise-panel">
+                    <div class="panel-header">
+                        <h2>📦 Merchandise</h2>
+                        <span class="badge" id="merchCount">0 items</span>
+                    </div>
+
+                    <div class="merchandise-list" id="merchandiseList">
+                        <div class="loading">Loading merchandise...</div>
+                    </div>
+
+                    <!-- Add New Merchandise -->
+                    <div class="add-merchandise">
+                        <h3>Add New</h3>
+                        <div class="add-form">
+                            <input type="text" id="newMerchName" placeholder="Product Name">
+                            <input type="text" id="newMerchUrl" placeholder="Amazon URL">
+                            <button type="button" id="addMerchBtn" class="btn-primary">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Sessions -->
+            <div class="sessions-section">
+                <div class="panel-header">
+                    <h2>🖥️ Active Browser Sessions</h2>
+                    <span class="badge" id="sessionCount">0 active</span>
+                </div>
+                <div class="session-list" id="sessionList">
+                    <div class="empty-state">No active sessions. Select an account to start.</div>
+                </div>
+            </div>
+
+            <!-- Bottom Half: Account Data Table -->
+            <div class="data-section">
+                <div class="panel-header">
+                    <h2>📊 Account Data</h2>
+                    <span class="badge" id="totalAccounts">0 accounts</span>
+                </div>
+                <div class="table-container">
+                    <table id="accountTable">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Card</th>
+                                <th>Remain Credit</th>
+                                <th>Full Name</th>
+                                <th>Address</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="5">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- URL Copied Toast -->
+    <div id="toast" class="toast hidden">
+        <span class="toast-icon">✓</span>
+        <span class="toast-text">URL Copied!</span>
+    </div>
+
+    <script src="/static/purchase.js"></script>
+</body>
+
+</html>
