@@ -1,6 +1,6 @@
-# Amenify Account Automation
+# Apartment Account Automation
 
-A web-based automation tool for managing Amenify accounts. Features include:
+A web-based automation tool for managing Apartment accounts. Features include:
 
 - **Account Generator**: Create new accounts using Gmail dot variations
 - **Payment Manager**: Manage payment methods for accounts
@@ -43,7 +43,7 @@ python3 --version  # Should show Python 3.11+
 
 ```bash
 git clone <your-repo-url>
-cd Amenify
+cd Apartment
 ```
 
 ### 2. Create Virtual Environment
@@ -88,8 +88,7 @@ Create or edit `locations.csv` with your apartment locations:
 
 ```csv
 geolocation,full_address
-"29.759710874456367, -95.60718920632674","1200 S Dairy Ashford Rd, Houston, TX 77077"
-"29.496038452039212, -98.57122835711658","1751 Babcock Rd, San Antonio, TX 78229"
+"12,99999999, 34.8888888","123 Road, Springfiled, XY"
 ```
 
 ## Running the Application
@@ -144,7 +143,7 @@ Open your browser and navigate to `http://localhost:5011`
 ## Project Structure
 
 ```
-Amenify/
+Apartment/
 ├── main.py              # Flask server and API routes
 ├── data_manager.py      # CSV data handling
 ├── register.py          # Account registration automation
