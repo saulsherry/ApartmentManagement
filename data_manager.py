@@ -98,11 +98,16 @@ class DataManager:
         """Appends a new row to the account_data.csv."""
         complete_row = {col: row_data.get(col, "") for col in self.OUTPUT_COLUMNS}
         
-        with open(self.OUTPUT_FILE, mode='a', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=self.OUTPUT_COLUMNS)
-            writer.writerow(complete_row)
-        
+        # Add to cache
         self.data_cache.append(complete_row)
+        
+        # Rewrite entire file to ensure column consistency
+        with open(self.OUTPUT_FILE, mode='w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=self.OUTPUT_COLUMNS)
+            writer.writeheader()
+            for row in self.data_cache:
+                cleaned_row = {col: row.get(col, '') for col in self.OUTPUT_COLUMNS}
+                writer.writerow(cleaned_row)
 
     def get_register_page(self, use_refer=True, base_url=None):
         """Get registration page URL, optionally using referral links."""

@@ -175,14 +175,14 @@ def calculate_max_dot_emails(gmail):
 def generate_dot_variations(gmail, count):
     """
     Generate unique email variations using the Gmail dot trick.
-    Skips the original email without dots.
+    Uses randomized dot placement (not sequential).
     
     Args:
         gmail: Base Gmail address (e.g., "johnsmith@gmail.com")
         count: Number of variations to generate
         
     Returns:
-        List of unique email addresses (only dotted variations, excluding original)
+        List of unique email addresses (dotted variations, excluding original)
     """
     if '@' not in gmail:
         return [gmail]
@@ -194,15 +194,17 @@ def generate_dot_variations(gmail, count):
     if n <= 1:
         return [gmail]
     
-    emails = []
     positions = n - 1  # Number of positions where dots can go
     
-    # Iterate through all possible combinations
-    # Start from i=1 to skip i=0 (which is the original email without dots)
-    for i in range(1, 2 ** positions):
-        if len(emails) >= count:
-            break
-            
+    # Generate all possible indices (skip 0 which is the original email)
+    all_indices = list(range(1, 2 ** positions))
+    random.shuffle(all_indices)
+    
+    # Take only as many as needed
+    selected_indices = all_indices[:min(count, len(all_indices))]
+    
+    emails = []
+    for i in selected_indices:
         # Build email with dots based on binary representation
         email_chars = []
         for j, char in enumerate(username):
@@ -212,9 +214,6 @@ def generate_dot_variations(gmail, count):
                 email_chars.append('.')
         
         new_email = ''.join(email_chars) + '@' + domain
-        
-        # Skip if already added
-        if new_email not in emails:
-            emails.append(new_email)
+        emails.append(new_email)
     
-    return emails[:count]
+    return emails

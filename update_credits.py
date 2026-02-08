@@ -1,4 +1,4 @@
-from playwright.sync_api import sync_playwright
+from data_manager import DataManager
 import time
 import csv
 import os
@@ -82,8 +82,10 @@ def _update_credit_in_csv(email, credit_value):
     # Read all rows
     with open(csv_file, mode='r', newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
-        fieldnames = reader.fieldnames
         rows = list(reader)
+    
+    # Use canonical column list to avoid field mismatch errors
+    fieldnames = DataManager.OUTPUT_COLUMNS
     
     # Update the specific row
     for row in rows:

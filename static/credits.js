@@ -56,13 +56,14 @@ async function loadTableData() {
         const tbody = document.getElementById('tableBody');
 
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="loading">No accounts found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">No accounts found.</td></tr>';
             return;
         }
 
         tbody.innerHTML = data.map(row => {
             const credit = row.remain_credit ? `$${row.remain_credit}` : '-';
             const creditClass = row.remain_credit && parseFloat(row.remain_credit) > 0 ? 'credit-value' : '';
+            const btnDisabled = isRunning ? 'disabled' : '';
 
             return `
                 <tr data-email="${escapeHtml(row.email)}">
@@ -70,9 +71,21 @@ async function loadTableData() {
                     <td>${escapeHtml(row.full_name || '-')}</td>
                     <td>${escapeHtml(row.card || '-')}</td>
                     <td class="${creditClass}">${credit}</td>
+                    <td><button class="start-from-btn" data-email="${escapeHtml(row.email)}" ${btnDisabled}>▶ Start</button></td>
                 </tr>
             `;
         }).join('');
+
+        // Add click handlers for start buttons
+        document.querySelectorAll('.start-from-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const email = btn.dataset.email;
+                if (email && !isRunning) {
+                    handleStartFrom(email);
+                }
+            });
+        });
     } catch (error) {
         logToConsole(`Error loading table: ${error.message}`, 'error');
     }
@@ -111,6 +124,42 @@ async function handleUpdateAll() {
         const response = await fetch('/api/credits/update-all', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'started') {
+            logToConsole('Update process started. Monitoring progress...', 'info');
+            startPolling();
+        } else {
+            throw new Error(result.message || 'Failed to start update');
+        }
+    } catch (error) {
+        logToConsole(`Error: ${error.message}`, 'error');
+        resetUI();
+    }
+}
+
+async function handleStartFrom(email) {
+    const stopBtn = document.getElementById('stopBtn');
+    const progressSection = document.getElementById('progressSection');
+    const summarySection = document.getElementById('summarySection');
+
+    // Disable all start buttons
+    document.querySelectorAll('.start-from-btn').forEach(btn => btn.disabled = true);
+    stopBtn.classList.remove('hidden');
+    progressSection.classList.remove('hidden');
+    summarySection.classList.add('hidden');
+
+    isRunning = true;
+
+    logToConsole(`Starting credit update from ${email}...`, 'info');
+
+    try {
+        const response = await fetch('/api/credits/update-from', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ start_email: email })
         });
 
         const result = await response.json();
@@ -255,6 +304,9 @@ function resetUI() {
     btn.disabled = false;
     btn.querySelector('.btn-text').textContent = 'Update Credit for All Accounts';
     stopBtn.classList.add('hidden');
+
+    // Re-enable start-from buttons
+    document.querySelectorAll('.start-from-btn').forEach(b => b.disabled = false);
 
     isRunning = false;
 

@@ -153,8 +153,6 @@ def get_data():
     return jsonify(dm.data_cache)
 
 
-# Old /api/register endpoint removed - we now use /api/generate instead
-
 
 @app.route('/api/purchase', methods=['POST'])
 def make_purchases():
@@ -888,6 +886,115 @@ def get_credits_status():
     credits_status["messages"] = []
     
     return jsonify(response)
+
+@app.route('/api/credits/update-from', methods=['POST'])
+def update_credits_from():
+    """Start updating credits from a specific account"""
+    global credits_status
+    
+    data = request.json
+    start_email = data.get('start_email')
+    
+    if not start_email:
+        return jsonify({"status": "error", "message": "start_email is required"})
+    
+    # Reset status
+    credits_status = {
+        "status": "running",
+        "message": f"Starting from {start_email}...",
+        "messages": [],
+        "completed": 0,
+        "total": 0,
+        "successful": 0,
+        "failed": 0,
+        "current_email": None,
+        "stop_requested": False
+    }
+    
+    def run_credits_update_from():
+        global credits_status
+        
+        try:
+            dm.load_data()
+            all_accounts = [row for row in dm.data_cache if row.get('email') and row.get('password')]
+            
+            # Find starting index
+            start_idx = 0
+            for idx, acc in enumerate(all_accounts):
+                if acc.get('email') == start_email:
+                    start_idx = idx
+                    break
+            
+            # Slice accounts from starting point
+            accounts = all_accounts[start_idx:]
+            
+            credits_status["total"] = len(accounts)
+            add_credits_message(f"Starting from {start_email} ({len(accounts)} accounts remaining)", "info")
+            
+            for idx, account in enumerate(accounts):
+                # Check if stop was requested
+                if credits_status["stop_requested"]:
+                    add_credits_message("Stop requested. Finishing current account...", "warning")
+                    break
+                
+                email = account['email']
+                password = account['password']
+                full_name = account.get('full_name', '')
+                phone_number = account.get('phone_number', '')
+                
+                credits_status["current_email"] = email
+                credits_status["completed"] = idx
+                
+                add_credits_message(f"[{idx+1}/{len(accounts)}] Processing {email}...", "info")
+                
+                try:
+                    # Sign in (headless)
+                    p, browser, context, page = run_signin(email, password, full_name, phone_number, base_url=app_config['base_url'])
+                    
+                    # Update credits
+                    credit_value = run_update_credits(email, page)
+                    
+                    add_credits_message(f"✓ {email}: ${credit_value}", "success")
+                    credits_status["successful"] += 1
+                    
+                    # Close browser
+                    browser.close()
+                    p.stop()
+                    
+                    # Small delay between accounts
+                    time.sleep(1)
+                    
+                except Exception as e:
+                    add_credits_message(f"✗ {email}: {str(e)}", "error")
+                    credits_status["failed"] += 1
+                    
+                    # Try to close browser on error
+                    try:
+                        browser.close()
+                        p.stop()
+                    except:
+                        pass
+            
+            credits_status["completed"] = len(accounts)
+            
+            if credits_status["stop_requested"]:
+                credits_status["status"] = "stopped"
+                credits_status["message"] = "Update stopped by user"
+            else:
+                credits_status["status"] = "complete"
+                credits_status["message"] = "Credit update complete!"
+                add_credits_message(f"Complete! {credits_status['successful']} successful, {credits_status['failed']} failed.", "success")
+            
+        except Exception as e:
+            credits_status["status"] = "error"
+            credits_status["message"] = str(e)
+            add_credits_message(f"Error: {str(e)}", "error")
+    
+    # Run in background thread
+    thread = threading.Thread(target=run_credits_update_from)
+    thread.start()
+    
+    return jsonify({"status": "started"})
 
 @app.route('/api/credits/stop', methods=['POST'])
 def stop_credits_update():
